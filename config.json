@@ -1,0 +1,23 @@
+{
+  "site_name": "Mercado da Aliança",
+  "site_tagline": "Inteligência de mercado do WoW Forever para jogadores da Aliança, em português",
+  "api_base": "https://auctionhouse.fyi/api/v1",
+  "source_name": "auctionhouse.fyi",
+  "source_url": "https://auctionhouse.fyi/",
+  "markets": {
+    "forever.normal.alliance.us": "Normal",
+    "forever.pvp.alliance.us": "PvP",
+    "forever.rp.alliance.us": "RP"
+  },
+  "bulletin_market": "auto",
+  "liquidity": {
+    "min_days_per_window": 3,
+    "min_median_qty": 5,
+    "min_price_copper": 100
+  },
+  "discord_url": "",
+  "newsletter_url": "",
+  "support_url": "",
+  "site_url": "",
+  "user_agent":"mercado-da-alianca/1.0 (boletim PT-BR; github.com)"
+}

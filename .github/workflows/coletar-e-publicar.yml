@@ -1,0 +1,58 @@
+name: Coletar preços e publicar o site
+
+on:
+  schedule:
+    - cron: "5 */3 * * *"   # a cada 3 horas, no minuto 5 (horário UTC)
+  push:
+    branches: [main]        # republica quando você edita algo (ex.: a opinião da semana)
+  workflow_dispatch:        # botão "Run workflow" para rodar na hora
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: coletar-e-publicar
+  cancel-in-progress: false
+
+jobs:
+  rodar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Coletar preços
+        run: python scripts/collect.py
+
+      - name: Guardar os dados no repositório
+        run: |
+          git config user.name "coletor"
+          git config user.email "coletor@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "Nada novo para guardar"
+          else
+            git commit -m "Coleta $(date -u +%Y-%m-%dT%H:%MZ)"
+            git pull --rebase
+            git push
+          fi
+
+      - name: Gerar o site
+        run: python scripts/build_site.py
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

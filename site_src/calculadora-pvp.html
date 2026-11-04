@@ -1,0 +1,87 @@
+<h1>Calculadora de rank PvP</h1>
+<p class="lead">Descubra em que semana da temporada você chega ao rank da recompensa que quer, respeitando o limite semanal de Rank Points.</p>
+
+<form class="calc" id="calc" onsubmit="return false">
+  <div><label for="alvo">Recompensa que você quer</label><select id="alvo"></select></div>
+  <div><label for="pontos">Rank Points que você já tem</label><input id="pontos" type="number" min="0" step="50" value="0"></div>
+  <div><label for="semana">Semana atual da temporada</label><input id="semana" type="number" min="1" max="20" value="1"></div>
+  <div><label for="horas">Horas de PvP por semana</label><input id="horas" type="number" min="0" step="0.5" value="6"></div>
+  <div><label for="taxa">Rank Points por hora (sua média)</label><input id="taxa" type="number" min="1" step="25" value="400"></div>
+</form>
+
+<div class="result" id="resultado" aria-live="polite"></div>
+<div id="semanas"></div>
+
+<h2>Ranks e recompensas</h2>
+<p class="meta">Custos de rank e limites semanais vêm do datamine do cliente de beta e das listas públicas; os marcados com * ainda não foram confirmados no jogo. Ajustamos conforme a temporada avança.</p>
+<table>
+  <thead><tr><th>Rank</th><th>Título (Aliança)</th><th class="num">Rank Points acumulados</th><th>Libera para compra</th></tr></thead>
+  <tbody id="tabela"></tbody>
+</table>
+
+<script>
+const RANKS = [
+  [1, "Private", 750, "Tabardo da facção"],
+  [2, "Corporal", 1650, "Berloque PvP"],
+  [3, "Sergeant", 2700, "Capas"],
+  [4, "Master Sergeant", 3900, "Colar"],
+  [5, "Sergeant Major", 5250, "Poções de combate"],
+  [6, "Knight", 6750, "Tabardo"],
+  [7, "Knight-Lieutenant", 8400, "Estandarte de batalha"],
+  [8, "Knight-Captain", 10200, "Token épico de braçadeiras e cinto"],
+  [9, "Knight-Champion", 12150, "Token épico de botas"],
+  [10, "Lieutenant Commander", 14250, "A confirmar", true],
+  [11, "Commander", 16500, "Montarias", true],
+  [12, "Marshal", 18900, "A confirmar", true],
+  [13, "Field Marshal", 21450, "A confirmar", true],
+  [14, "Grand Marshal", 24750, "Armas épicas"]
+];
+// Teto acumulado de Rank Points por semana da temporada (semanas 7 a 10 estimadas).
+const CAP = [2700, 5250, 6750, 8400, 10200, 12150, 14250, 16500, 18900, 24750];
+
+const alvo = document.getElementById("alvo");
+const tabela = document.getElementById("tabela");
+RANKS.forEach(([r, t, pts, rec, est]) => {
+  const o = document.createElement("option");
+  o.value = r; o.textContent = `Rank ${r} · ${rec}`;
+  if (r === 8) o.selected = true;
+  alvo.appendChild(o);
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td>${r}</td><td>${t}</td><td class="num">${pts.toLocaleString("pt-BR")}${est ? " *" : ""}</td><td>${rec}</td>`;
+  tabela.appendChild(tr);
+});
+
+function capFor(week) { return week <= CAP.length ? CAP[week - 1] : CAP[CAP.length - 1]; }
+
+function calcular() {
+  const rank = +alvo.value;
+  const meta = RANKS[rank - 1][2];
+  let pts = Math.max(0, +document.getElementById("pontos").value || 0);
+  let week = Math.max(1, Math.round(+document.getElementById("semana").value || 1));
+  const porSemana = Math.max(0, +document.getElementById("horas").value || 0) * Math.max(0, +document.getElementById("taxa").value || 0);
+  const res = document.getElementById("resultado");
+  const linhas = [];
+  if (pts >= meta) { res.innerHTML = `Você já tem pontos para o <strong>rank ${rank}</strong>.`; document.getElementById("semanas").innerHTML = ""; return; }
+  if (porSemana <= 0) { res.textContent = "Informe horas e Rank Points por hora para calcular."; document.getElementById("semanas").innerHTML = ""; return; }
+  let w = week, limitado = 0, n = 0;
+  while (pts < meta && n < 30) {
+    const teto = capFor(w);
+    const ganho = Math.min(porSemana, Math.max(0, teto - pts));
+    if (ganho < porSemana) limitado++;
+    pts += ganho;
+    linhas.push(`<tr><td>Semana ${w}</td><td class="num">${Math.round(pts).toLocaleString("pt-BR")}</td><td class="num">${teto.toLocaleString("pt-BR")}</td></tr>`);
+    w++; n++;
+    if (w > CAP.length + 1 && pts >= CAP[CAP.length - 1]) break;
+  }
+  if (pts >= meta) {
+    const semanaFinal = w - 1;
+    const motivo = limitado ? " O limite semanal segurou seu ritmo em " + limitado + (limitado === 1 ? " semana." : " semanas.") : " Seu ritmo, não o limite semanal, é o que define o prazo.";
+    res.innerHTML = `Você chega ao <strong>rank ${rank}</strong> na <strong>semana ${semanaFinal}</strong> da temporada, daqui a ${n} ${n === 1 ? "semana" : "semanas"}.` + motivo;
+  } else {
+    res.innerHTML = `Com esse ritmo você não chega ao rank ${rank} nesta temporada. Tente mais horas por semana.`;
+  }
+  document.getElementById("semanas").innerHTML = `<table><thead><tr><th>Semana</th><th class="num">Seus Rank Points</th><th class="num">Teto da semana</th></tr></thead><tbody>${linhas.join("")}</tbody></table>`;
+}
+document.getElementById("calc").addEventListener("input", calcular);
+calcular();
+</script>

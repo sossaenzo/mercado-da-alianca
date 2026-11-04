@@ -1,0 +1,92 @@
+:root {
+  color-scheme: light;
+  --surface: #fcfcfb;
+  --surface-2: #f3f2ee;
+  --rule: #e2e0d9;
+  --text: #0b0b0b;
+  --text-2: #52514e;
+  --text-3: #7a7974;
+  --accent: #2a78d6;
+  --up: #2a78d6;
+  --down: #e34948;
+  --gold: #a8740a;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface: #1a1a19;
+    --surface-2: #232321;
+    --rule: #383835;
+    --text: #f0efec;
+    --text-2: #c3c2b7;
+    --text-3: #93928b;
+    --accent: #3987e5;
+    --up: #3987e5;
+    --down: #e66767;
+    --gold: #e0a93a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1a1a19; --surface-2: #232321; --rule: #383835;
+  --text: #f0efec; --text-2: #c3c2b7; --text-3: #93928b;
+  --accent: #3987e5; --up: #3987e5; --down: #e66767; --gold: #e0a93a;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--surface); color: var(--text);
+  font: 16px/1.55 "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+a { color: var(--accent); }
+.wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+header.site { border-bottom: 1px solid var(--rule); }
+header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 14px; padding-bottom: 14px; flex-wrap: wrap; }
+.brand { font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; letter-spacing: -0.01em; }
+.brand span { color: var(--gold); }
+nav a { color: var(--text-2); text-decoration: none; margin-left: 16px; font-size: 15px; }
+nav a:hover { color: var(--text); }
+main { padding: 32px 0 48px; }
+h1 { font-size: 30px; line-height: 1.2; margin: 0 0 8px; letter-spacing: -0.02em; }
+h2 { font-size: 21px; margin: 40px 0 6px; letter-spacing: -0.01em; }
+.lead { color: var(--text-2); font-size: 18px; margin: 0 0 24px; }
+.meta { color: var(--text-3); font-size: 14px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 24px 0; }
+.tile { background: var(--surface-2); border-radius: var(--radius); padding: 14px 16px; }
+.tile .v { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tile .l { color: var(--text-2); font-size: 14px; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 15px; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+th { color: var(--text-3); font-weight: 600; font-size: 13px; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+.up { color: var(--up); font-weight: 600; }
+.down { color: var(--down); font-weight: 600; }
+.q2 { color: #1eac30; } .q3 { color: #2a78d6; } .q4 { color: #8c4fd8; }
+.chart { margin: 12px 0 4px; }
+.chart svg { width: 100%; height: auto; display: block; }
+.chart text { fill: var(--text-2); font-size: 12px; }
+.chart .lbl { fill: var(--text); font-size: 13px; }
+.bar-up { fill: var(--up); } .bar-down { fill: var(--down); }
+.bar:hover { opacity: 0.8; }
+.only-sm { display: none; }
+.axis { stroke: var(--text-3); stroke-width: 1; }
+.grid { stroke: var(--rule); stroke-width: 1; }
+.spark { stroke: var(--text-2); stroke-width: 1.5; fill: none; }
+.note { background: var(--surface-2); border-left: 3px solid var(--gold); padding: 12px 16px; border-radius: 0 var(--radius) var(--radius) 0; margin: 20px 0; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
+.btn { display: inline-block; padding: 10px 16px; border-radius: 8px; background: var(--accent); color: #fff; text-decoration: none; font-weight: 600; }
+.btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+.list { list-style: none; padding: 0; margin: 0; }
+.list li { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+footer { border-top: 1px solid var(--rule); color: var(--text-3); font-size: 13px; padding: 20px 0 32px; }
+form.calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 20px 0; }
+form.calc label { display: block; font-size: 14px; color: var(--text-2); margin-bottom: 4px; }
+form.calc input, form.calc select { width: 100%; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--rule); background: var(--surface); color: var(--text); font: inherit; }
+.result { font-size: 20px; margin: 8px 0 20px; }
+@media (max-width: 560px) {
+  h1 { font-size: 25px; }
+  nav a { margin-left: 0; margin-right: 14px; }
+  .hide-sm { display: none; }
+  .only-lg { display: none; }
+  .only-sm { display: block; }
+}
