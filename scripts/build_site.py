@@ -44,7 +44,7 @@ def page(title, body, depth=0, description=""):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{E(title)} · {name}</title>
+<title>{E(title) if title == CONFIG["site_name"] else E(title) + " · " + name}</title>
 <meta name="description" content="{E(description or CONFIG['site_tagline'])}">
 <link rel="stylesheet" href="{up}style.css">
 </head>
