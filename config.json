@@ -9,7 +9,7 @@
     "forever.pvp.alliance.us": "PvP",
     "forever.rp.alliance.us": "RP"
   },
-  "bulletin_market": "auto",
+  "bulletin_market": "forever.pvp.alliance.us",
   "liquidity": {
     "min_days_per_window": 3,
     "min_median_qty": 5,
