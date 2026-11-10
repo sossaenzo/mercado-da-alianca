@@ -120,8 +120,10 @@ def weekly_report(market, as_of):
             "change": cur / prev - 1, "spark": spark,
         })
     tracked = sum(1 for days in hist.values() if any(cur_start <= d <= as_of for d in days))
-    ups = sorted([r for r in rows if r["change"] > 0], key=lambda r: -r["change"])[:10]
-    downs = sorted([r for r in rows if r["change"] < 0], key=lambda r: r["change"])[:10]
+    # Destaques só entre materiais e consumíveis com nome conhecido: é o que o leitor farma, fabrica e compra.
+    focus = [r for r in rows if r["category"] and not r["name"].startswith("Item ")]
+    ups = sorted([r for r in focus if r["change"] > 0], key=lambda r: -r["change"])[:10]
+    downs = sorted([r for r in focus if r["change"] < 0], key=lambda r: r["change"])[:10]
     cats = {}
     for r in rows:
         if r["category"]:
@@ -136,8 +138,8 @@ def weekly_report(market, as_of):
         "as_of": as_of,
         "windows": {"cur": (cur_start, as_of), "prev": (prev_start, prev_end), "full": full},
         "tracked": tracked,
-        "liquid": len(rows),
-        "median_change": statistics.median([r["change"] for r in rows]) if rows else None,
+        "liquid": len(focus),
+        "median_change": statistics.median([r["change"] for r in focus]) if focus else None,
         "ups": ups,
         "downs": downs,
         "categories": categories,

@@ -170,7 +170,7 @@ def report_body(rep, heading, monday_iso=None, number=None):
         f'<p class="lead">{lead}</p>',
         '<div class="tiles">',
         f'<div class="tile"><div class="v">{rep["tracked"]:,}</div><div class="l">itens vistos no leilão na semana</div></div>'.replace(",", "."),
-        f'<div class="tile"><div class="v">{rep["liquid"]:,}</div><div class="l">com negociação suficiente para comparar</div></div>'.replace(",", "."),
+        f'<div class="tile"><div class="v">{rep["liquid"]:,}</div><div class="l">materiais e consumíveis comparados</div></div>'.replace(",", "."),
         f'<div class="tile"><div class="v">{pct(rep["median_change"])}</div><div class="l">variação mediana desses itens</div></div>',
         "</div>",
         opinion_html(monday_iso) if monday_iso else "",
