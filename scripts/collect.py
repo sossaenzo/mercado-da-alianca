@@ -18,7 +18,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG = json.load(open(os.path.join(ROOT, "config.json"), encoding="utf-8"))
@@ -91,8 +91,38 @@ def write_obs(path, rows):
         w.writerows(rows)
 
 
+def save_days(market, snap):
+    """Guarda o histórico diário que vem no snapshot (cerca de 7 dias), somando ao que já existia.
+
+    Formato da fonte: [chave, [[dia desde 1970, preço, quantidade], ...]].
+    """
+    days = snap.get("days") or []
+    if not days:
+        return 0
+    path = os.path.join(DATA, "days", f"{market}.json")
+    store = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}
+    n = 0
+    for entry in days:
+        key, series = entry[0], entry[1] or []
+        item = store.setdefault(str(key), {})
+        for point in series:
+            day_idx, price, qty = (list(point) + [None] * 3)[:3]
+            if price is None:
+                continue
+            day = (date(1970, 1, 1) + timedelta(days=int(day_idx))).isoformat()
+            item[day] = [int(price), qty]
+            n += 1
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(store, f, separators=(",", ":"))
+    return n
+
+
 def collect_market(market, run_at):
     snap = get_json(f"/ah/{market}/snapshot")
+    n_days = save_days(market, snap)
+    if n_days:
+        print(f"  {market}: histórico diário com {n_days} pontos")
     rows = snap.get("rows") or []
     if not rows:
         print(f"  {market}: snapshot vazio (sem scans ainda)")
@@ -118,12 +148,13 @@ def collect_market(market, run_at):
 
 
 def rebuild_history(market):
-    """Uma linha por dia e item: mínimo, mediana e quantidade mediana entre as coletas do dia."""
+    """Uma linha por dia e item: mínimo, mediana e quantidade mediana entre as coletas do dia.
+
+    Dias sem coleta própria são completados com o histórico diário da fonte (n_obs = 0).
+    """
     folder = os.path.join(DATA, "obs", market)
-    if not os.path.isdir(folder):
-        return
     out = []
-    for fname in sorted(os.listdir(folder)):
+    for fname in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
         if not fname.endswith(".csv.gz"):
             continue
         day = fname[:10]
@@ -143,6 +174,18 @@ def rebuild_history(market):
                 "qty_median": int(statistics.median(d["q"])) if d["q"] else "",
                 "n_obs": len(d["runs"]),
             })
+    have = {(r["date"], str(r["key"])) for r in out}
+    days_path = os.path.join(DATA, "days", f"{market}.json")
+    if os.path.exists(days_path):
+        for key, series in json.load(open(days_path, encoding="utf-8")).items():
+            for day, (price, qty) in series.items():
+                if (day, key) in have:
+                    continue
+                out.append({"date": day, "key": key, "price_min": price, "price_median": price,
+                            "qty_median": "" if qty is None else qty, "n_obs": 0})
+    if not out:
+        return
+    out.sort(key=lambda r: (r["date"], str(r["key"])))
     os.makedirs(os.path.join(DATA, "history"), exist_ok=True)
     with open(os.path.join(DATA, "history", f"{market}.csv"), "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["date", "key", "price_min", "price_median", "qty_median", "n_obs"])

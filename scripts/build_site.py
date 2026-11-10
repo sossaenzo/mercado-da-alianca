@@ -166,7 +166,7 @@ def report_body(rep, heading, monday_iso=None, number=None):
     num = f"Boletim nº {number} · " if number else ""
     parts = [
         f"<h1>{E(heading)}</h1>",
-        f'<p class="meta">{num}Mercado da Aliança, ruleset {E(rep["market_label"])} · dados até {br_date(rep["as_of"])}</p>',
+        f'<p class="meta">{num}Mercado {E(rep["market_label"])} · dados até {br_date(rep["as_of"])}</p>',
         f'<p class="lead">{lead}</p>',
         '<div class="tiles">',
         f'<div class="tile"><div class="v">{rep["tracked"]:,}</div><div class="l">itens vistos no leilão na semana</div></div>'.replace(",", "."),
@@ -242,9 +242,15 @@ def main():
         else:
             shutil.copy(os.path.join(SRC, f), OUT)
 
-    market = pick_market()
+    market, wanted = pick_market()
     dates = all_dates(load_history(market)) if market else []
     today = today_utc().isoformat()
+    banner = ""
+    if wanted:
+        banner = (f'<p class="note">Ainda não há scans do leilão {E(CONFIG["markets"].get(wanted, wanted))} na fonte de dados. '
+                  f'Enquanto isso, este boletim acompanha o mercado {E(CONFIG["markets"].get(market, market))}, '
+                  'o único com scans suficientes. Os preços de materiais costumam andar juntos entre as facções, '
+                  'mas não são iguais.</p>')
 
     # Boletins semanais
     bulletins = []
@@ -256,8 +262,8 @@ def main():
         mi = monday.isoformat()
         heading = f"Boletim de {br_date(mi)}"
         write(os.path.join(OUT, "boletins", f"{mi}.html"),
-              page(heading, report_body(rep, heading, mi, i) + cta(), depth=1,
-                   description=f"Mercado da Aliança no WoW Forever: altas e quedas até {br_date(as_of)}."))
+              page(heading, banner + report_body(rep, heading, mi, i) + cta(), depth=1,
+                   description=f"Leilão do WoW Forever: altas e quedas até {br_date(as_of)}."))
         bulletins.append((mi, i, rep))
 
     items = "".join(
@@ -272,7 +278,7 @@ def main():
     complete = [d for d in dates if d < today] or dates
     rep = weekly_report(market, complete[-1]) if complete else None
     if rep:
-        body = report_body(rep, "O mercado da Aliança agora")
+        body = banner + report_body(rep, "O mercado agora" if wanted else "O mercado da Aliança agora")
         if bulletins:
             mi, n, _ = bulletins[-1]
             body = f'<p class="note">Saiu o <a href="boletins/{mi}.html">boletim nº {n}</a>.</p>' + body

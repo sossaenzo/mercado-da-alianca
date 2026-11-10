@@ -5,10 +5,14 @@
   "source_name": "auctionhouse.fyi",
   "source_url": "https://auctionhouse.fyi/",
   "markets": {
-    "forever.normal.alliance.us": "Normal",
-    "forever.pvp.alliance.us": "PvP",
-    "forever.rp.alliance.us": "RP"
+    "forever.normal.alliance.us": "Normal (Aliança)",
+    "forever.pvp.alliance.us": "PvP (Aliança)",
+    "forever.rp.alliance.us": "RP (Aliança)",
+    "forever.normal.horde.us": "Normal (Horda)",
+    "forever.pvp.horde.us": "PvP (Horda)",
+    "forever.rp.horde.us": "RP (Horda)"
   },
+  "bulletin_fallback": true,
   "bulletin_market": "forever.pvp.alliance.us",
   "liquidity": {
     "min_days_per_window": 3,

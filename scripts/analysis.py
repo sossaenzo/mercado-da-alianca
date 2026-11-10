@@ -51,18 +51,26 @@ def all_dates(hist):
     return sorted({d for days in hist.values() for d in days})
 
 
+def market_days(market):
+    return len(all_dates(load_history(market)))
+
+
 def pick_market():
-    if CONFIG.get("bulletin_market", "auto") != "auto":
-        return CONFIG["bulletin_market"]
-    best, best_n = None, -1
-    for m in CONFIG["markets"]:
-        h = load_history(m)
-        ds = all_dates(h)
-        recent = set(ds[-7:])
-        n = sum(1 for days in h.values() if recent & set(days))
-        if n > best_n:
-            best, best_n = m, n
-    return best
+    """Mercado do boletim. Se o mercado escolhido ainda não tem 3 dias de dados e
+    bulletin_fallback estiver ligado, usa o mercado com mais dias, deixando isso claro na página.
+
+    Devolve (mercado usado, mercado desejado ou None quando não houve troca).
+    """
+    target = CONFIG.get("bulletin_market", "auto")
+    ranked = sorted(CONFIG["markets"], key=lambda m: -market_days(m))
+    if target == "auto":
+        return ranked[0], None
+    if market_days(target) >= 3 or not CONFIG.get("bulletin_fallback"):
+        return target, None
+    best = ranked[0]
+    if market_days(best) == 0:
+        return target, None
+    return best, target
 
 
 def window_median(days, start, end):
